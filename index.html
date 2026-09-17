@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Earth Map</title>
+    
+    <!-- 1. Load Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    
+    <style>
+        /* Make the map fill the entire browser window */
+        html, body, #map {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+        /* Style a basic control panel overlay */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000; /* Ensure it sits on top of the map */
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <!-- 2. The Map Container and UI controls -->
+    <div id="control-panel">
+        <h3>Code Playground</h3>
+        <p>Click below to manipulate things programmatically:</p>
+        <button onclick="teleportMarker()">Move Marker via Code</button>
+    </div>
+    
+    <div id="map"></div>
+
+    <!-- 3. Load Leaflet JavaScript Library -->
+    <script src="https://unpkg.com"></script>
+    
+    <script>
+        // 4. Initialize the map and set its default view (Latitude, Longitude, Zoom level)
+        // Zoom level 2 shows the entire flat 2D Earth.
+        const map = L.map('map').setView([20, 0], 2);
+
+        // 5. Load and display map tiles from OpenStreetMap (Free & Open Source)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 6. Create a marker at an initial position (e.g., London: 51.5, -0.09)
+        // We use 'let' so we can modify this marker object later in the code
+        let customMarker = L.marker([51.5, -0.09]).addTo(map);
+        customMarker.bindPopup("<b>Hello!</b><br>I am a marker controlled by code.").openPopup();
+
+        // 7. THE CODE PLAYGROUND: Functions to move things around
+        
+        // This function changes the marker's coordinates instantly when the button is clicked
+        function teleportMarker() {
+            // New coordinates (e.g., New York: 40.7128, -74.0060)
+            const newLat = 40.7128;
+            const newLng = -74.0060;
+            
+            // Move the marker in the code
+            customMarker.setLatLng([newLat, newLng]);
+            
+            // Update the popup message
+            customMarker.setPopupContent("<b>Teleported!</b><br>The JavaScript code moved me to New York.").openPopup();
+            
+            // Pan the map camera smoothly to the new location
+            map.flyTo([newLat, newLng], 6);
+        }
+
+        // BONUS: Listen for clicks on the map to get coordinates automatically
+        map.on('click', function(e) {
+            console.log("You clicked the map at Code Coordinates: ", e.latlng.lat, e.latlng.lng);
+            
+            // Example of creating a temporary marker exactly where you clicked
+            L.circleMarker(e.latlng, {color: 'red', radius: 10}).addTo(map)
+                .bindPopup("Code spawned me at: <br>" + e.latlng.toString())
+                .openPopup();
+        });
+    </script>
+</body>
+</html>
