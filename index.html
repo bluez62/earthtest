@@ -5,92 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Earth Map</title>
     
-    <!-- 1. Load Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com" />
+    <!-- 1. Load Leaflet CSS first -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        /* Make the map fill the entire browser window */
-        html, body, #map {
+        /* Reset defaults */
+        html, body {
             margin: 0;
             padding: 0;
-            height: 100%;
             width: 100%;
+            height: 100%;
             font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        /* Style a basic control panel overlay */
+
+        /* FIXED: Force the map to explicitly fill 100% of the viewport height and width */
+        #map {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Style the control panel overlay */
         #control-panel {
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 1000; /* Ensure it sits on top of the map */
+            z-index: 1000; /* Force it to stay on top of the map layer */
             background: white;
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            max-width: 250px;
         }
+
         button {
-            padding: 8px 12px;
+            padding: 10px 14px;
             cursor: pointer;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
+            font-weight: bold;
+            width: 100%;
         }
-        button:hover { background-color: #0056b3; }
+        button:hover { 
+            background-color: #0056b3; 
+        }
     </style>
 </head>
 <body>
 
-    <!-- 2. The Map Container and UI controls -->
+    <!-- UI Overlay elements -->
     <div id="control-panel">
-        <h3>Code Playground</h3>
-        <p>Click below to manipulate things programmatically:</p>
+        <h3 style="margin-top: 0;">Code Playground</h3>
+        <p style="font-size: 14px; color: #555;">Click below to shift things around in the JavaScript runtime:</p>
         <button onclick="teleportMarker()">Move Marker via Code</button>
     </div>
     
+    <!-- The physical map container -->
     <div id="map"></div>
 
-    <!-- 3. Load Leaflet JavaScript Library -->
-    <script src="https://unpkg.com"></script>
+    <!-- 2. Load Leaflet JavaScript Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
-        // 4. Initialize the map and set its default view (Latitude, Longitude, Zoom level)
-        // FIXED: Added [0, 0] so the map centers on the equator at startup
+        // 3. Initialize the map container and center it on the equator [Latitude, Longitude], Zoom level
         const map = L.map('map').setView([0, 0], 2);
 
-        // 5. Load and display map tiles from OpenStreetMap (Free & Open Source)
+        // 4. Pull free map layout tiles from OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // 6. Create a marker at an initial position (e.g., London: 51.5, -0.09)
+        // 5. Track a global marker variable so we can change it on demand
         let customMarker = L.marker([51.5, -0.09]).addTo(map);
         customMarker.bindPopup("<b>Hello!</b><br>I am a marker controlled by code.").openPopup();
 
-        // 7. Functions to move things around
+        // 6. Manipulate map elements programmatically
         function teleportMarker() {
-            // New coordinates (New York)
-            const newLat = 40.7128;
-            const newLng = -74.0060;
+            // Target coordinates (New York City)
+            const targetLat = 40.7128;
+            const targetLng = -74.0060;
             
-            // Move the marker in the code
-            customMarker.setLatLng([newLat, newLng]);
+            // Re-assign the map coordinates of our marker object
+            customMarker.setLatLng([targetLat, targetLng]);
             
-            // Update the popup message
-            customMarker.setPopupContent("<b>Teleported!</b><br>The JavaScript code moved me to New York.").openPopup();
+            // Alter its tooltip state text
+            customMarker.setPopupContent("<b>Teleported!</b><br>The JavaScript engine moved me to New York.").openPopup();
             
-            // Pan the map camera smoothly to the new location
-            map.flyTo([newLat, newLng], 6);
+            // Pan and zoom the environment smoothly to focus on the target
+            map.flyTo([targetLat, targetLng], 6);
         }
 
-        // Listen for clicks on the map to get coordinates automatically
+        // 7. Click listener to print physical layout dimensions out to your console
         map.on('click', function(e) {
-            console.log("You clicked the map at Code Coordinates: ", e.latlng.lat, e.latlng.lng);
+            console.log("Map Clicked! Internal Coordinates:", e.latlng.lat, e.latlng.lng);
             
-            // Create a temporary circle marker exactly where you clicked
-            L.circleMarker(e.latlng, {color: 'red', radius: 10}).addTo(map)
-                .bindPopup("Code spawned me at: <br>" + e.latlng.toString())
+            L.circleMarker(e.latlng, { color: 'red', radius: 8 }).addTo(map)
+                .bindPopup("Generated at: <br>" + e.latlng.toString())
                 .openPopup();
         });
     </script>
