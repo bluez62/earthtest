@@ -55,8 +55,8 @@
     
     <script>
         // 4. Initialize the map and set its default view (Latitude, Longitude, Zoom level)
-        // Zoom level 2 shows the entire flat 2D Earth.
-        const map = L.map('map').setView([20, 0], 2);
+        // FIXED: Added [0, 0] so the map centers on the equator at startup
+        const map = L.map('map').setView([0, 0], 2);
 
         // 5. Load and display map tiles from OpenStreetMap (Free & Open Source)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -65,15 +65,12 @@
         }).addTo(map);
 
         // 6. Create a marker at an initial position (e.g., London: 51.5, -0.09)
-        // We use 'let' so we can modify this marker object later in the code
         let customMarker = L.marker([51.5, -0.09]).addTo(map);
         customMarker.bindPopup("<b>Hello!</b><br>I am a marker controlled by code.").openPopup();
 
-        // 7. THE CODE PLAYGROUND: Functions to move things around
-        
-        // This function changes the marker's coordinates instantly when the button is clicked
+        // 7. Functions to move things around
         function teleportMarker() {
-            // New coordinates (e.g., New York: 40.7128, -74.0060)
+            // New coordinates (New York)
             const newLat = 40.7128;
             const newLng = -74.0060;
             
@@ -87,11 +84,11 @@
             map.flyTo([newLat, newLng], 6);
         }
 
-        // BONUS: Listen for clicks on the map to get coordinates automatically
+        // Listen for clicks on the map to get coordinates automatically
         map.on('click', function(e) {
             console.log("You clicked the map at Code Coordinates: ", e.latlng.lat, e.latlng.lng);
             
-            // Example of creating a temporary marker exactly where you clicked
+            // Create a temporary circle marker exactly where you clicked
             L.circleMarker(e.latlng, {color: 'red', radius: 10}).addTo(map)
                 .bindPopup("Code spawned me at: <br>" + e.latlng.toString())
                 .openPopup();
