@@ -83,8 +83,14 @@
         }).addTo(map);
 
         // 5. Track a global marker variable so we can change it on demand
-        let customMarker = L.marker([51.5, -0.09]).addTo(map);
-        customMarker.bindPopup("<b>Hello!</b><br>I am a marker controlled by code.").openPopup();
+        // This makes the marker draggable and listens for where you drop it
+        let customMarker = L.marker([51.5, -0.09], { draggable: true }).addTo(map);
+        
+        customMarker.on('dragend', function(event) {
+            let position = customMarker.getLatLng();
+            customMarker.setPopupContent("Dropped at:<br>" + position.lat.toFixed(4) + ", " + position.lng.toFixed(4)).openPopup();
+        });
+
 
         // 6. Manipulate map elements programmatically
         function teleportMarker() {
